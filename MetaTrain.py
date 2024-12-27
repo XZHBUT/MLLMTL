@@ -13,25 +13,7 @@ from Tool.MetaTrainFunction import MaML_Finetunning_with_Learnable_triplet, MAMl
 
 if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    num_epochs = 100
-    max_lr = 0.003
-    min_lr = 0.0003
-    inner_step = 2
-    inner_lr = 0.08
-    initial_margin = 2.0
-    PK = 5
-    NK = 5
-    Train_Task = 100
-    Test_Task = 10
-    Train_bz = 64
-    Test_bz = 32
-    Way = 5
-    Shot = 5
-    QueryShot = 5
-    SampleLength = 2048
-    step = 1024
-    l1 = "MAMLtriplet2"  # "MAMLtriplet2"
-    Dataset = 'HUSTBearG'
+
 
     model = CNNModel_Mate(num_classes=5, drouput=0.5, initial_margin=initial_margin)
     # model.feature_extractor.load_state_dict(torch.load("CNNModel__HUST_JNU_HIT.pth"))
@@ -55,12 +37,12 @@ if __name__ == '__main__':
     curr_test_loss = 9999.0
     for epoch in range(num_epochs):
         train_loader = DataLoader(Train_dataset, batch_size=Train_bz, shuffle=True)
-        # 使用余弦退火公式计算学习率
+
         lr = min_lr + 0.5 * (max_lr - min_lr) * (1 + math.cos(epoch / num_epochs * math.pi))
-        # 设置优化器的学习率
+
         for param_group in optimizer.param_groups:
             param_group['lr'] = lr
-        # 训练模型
+
         model.train()
 
         for i, (bz_s_x, bz_s_y, bz_q_x, bz_q_y) in enumerate(train_loader):
@@ -80,7 +62,7 @@ if __name__ == '__main__':
         if (epoch + 1) % 10 == 0 or epoch == 0:
             test_loader = DataLoader(Test_dataset, batch_size=Test_bz, shuffle=True)
 
-            # 保存初始状态字典
+
             initial_state_dict = deepcopy(model.state_dict())
 
             print("===================================Test Task start===================================")
@@ -119,7 +101,6 @@ if __name__ == '__main__':
                            f"{l1}_{Dataset}_{inner_step}_{inner_lr}_Way_{10}_Shot_{5}_{initial_margin}.pth")
                 print("Model parameters saved.")
 
-            # 对比两个 state_dict
             changed = False
             for key in initial_state_dict:
                 if not torch.equal(initial_state_dict[key], model.state_dict()[key]):
